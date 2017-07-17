@@ -1,1 +1,1 @@
-https://www.kaggle.com/c/planet-understanding-the-amazon-from-space/submissions?sortBy=date&group=all&page=1
+https://www.kaggle.com/c/planet-understanding-the-amazon-from-space
