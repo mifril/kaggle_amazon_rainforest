@@ -119,109 +119,6 @@ def train_top_model(model, x_train, y_train, model_name, opt, n_epoch=100, batch
 
     return f2_val_score
 
-# def center_crop(x, center_crop_size=224):
-#     centerw, centerh = x.shape[1] // 2, x.shape[2] // 2
-#     halfw, halfh = center_crop_size // 2, center_crop_size // 2
-#     return x[:, centerw - halfw : centerw + halfw, centerh - halfh : centerh + halfh, :]
-
-# def random_crop(x, random_crop_size=224):
-#     w, h = x.shape[1], x.shape[2]
-#     # print (x.shape, w ,h)
-#     rangew = (w - random_crop_size) // 2
-#     rangeh = (h - random_crop_size) // 2
-#     offsetw = 0 if rangew == 0 else np.random.randint(rangew)
-#     offseth = 0 if rangeh == 0 else np.random.randint(rangeh)
-#     return x[:, offsetw : offsetw + random_crop_size, offseth : offseth + random_crop_size, :]
-
-# def flip_axis(x, axis):
-#     x = np.asarray(x).swapaxes(axis, 0)
-#     x = x[::-1, ...]
-#     x = x.swapaxes(0, axis)
-#     return x
-
-# def random_rotation(x, rg, row_axis=0, col_axis=1, channel_axis=2,
-#                     fill_mode='nearest', cval=0.):
-#     theta = np.pi / 180 * np.random.uniform(-rg, rg)
-#     rotation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],
-#                                 [np.sin(theta), np.cos(theta), 0],
-#                                 [0, 0, 1]])
-
-#     h, w = x.shape[row_axis], x.shape[col_axis]
-#     transform_matrix = transform_matrix_offset_center(rotation_matrix, h, w)
-#     x = apply_transform(x, transform_matrix, channel_axis, fill_mode, cval)
-    
-#     return x
-
-# def generator(X, y, batch_size, rescale=1./255., flip=True):
-#     batch_X = np.zeros((batch_size, 224, 224, 3))
-#     batch_y = np.zeros((batch_size, y.shape[1]))
-
-#     while True:
-#         for i in range(batch_size):
-#             idx = np.random.choice(len(X), 1)
-#             x = X[idx, :].astype(np.float32)
-#             x *= rescale
-            
-#             x = center_crop(x)
-
-            
-#             # if flip:
-#             #     if np.random.random() < 0.5:
-#             #         x = flip_axis(x, 1)
-#             #     if np.random.random() < 0.5:
-#             #         x = flip_axis(x, 2)
-#             # x = random_crop(x)
-
-#             batch_X[i] = x
-#             batch_y[i] = y[idx,:]
-
-#         yield batch_X, batch_y
-
-# def val_generator(X, y, batch_size, rescale=1./255.):
-#     batch_X = np.zeros((batch_size, 224, 224, 3))
-#     batch_y = np.zeros((batch_size, y.shape[1]))
-
-#     idx = 0
-#     while True:
-#         for i in range(batch_size):
-#             x = X[idx, :].astype(np.float32)
-#             x = x.reshape((1, x.shape[0], x.shape[1], x.shape[2]))
-
-#             x *= rescale
-#             x = center_crop(x)
-
-#             batch_X[i] = x
-#             batch_y[i] = y[idx,:]
-
-#             idx += 1
-#             if idx >= X.shape[0]:
-#                 batch_X = batch_X[:i+1]
-#                 batch_y = batch_y[:i+1]
-#                 idx = 0
-#                 break
-
-#         yield batch_X, batch_y
-
-
-# def test_generator(X, batch_size, rescale=1./255.):
-#     batch_X = np.zeros((batch_size, 224, 224, 3))
-#     idx = 0
-#     while True:
-#         for i in range(batch_size):
-#             x = X[idx, :].astype(np.float32)
-#             x = x.reshape((1, x.shape[0], x.shape[1], x.shape[2]))
-
-#             x *= rescale
-#             x = center_crop(x)
-
-#             batch_X[i] = x
-#             idx += 1
-#             if idx >= X.shape[0]:
-#                 batch_X = batch_X[:i+1]
-#                 idx = 0
-#                 break
-#         yield batch_X
-
 def get_test_batch(X, tta=False, batch_size=32):
     if not tta:
         i = 0
@@ -375,69 +272,14 @@ def predict(model, model_name, fout_name, batch_size, img_size=256, tta=True):
     else:
         preds_test = np.concatenate(preds_test)
 
-
-    # print('tta = ', tta)
-    # print (preds_test.shape)
     tags_test = []
     for pred in tqdm(preds_test):
         tags = [inv_label_map[j] for j in range(len(pred)) if pred[j] > best_threshold[j]]
         tags_test.append(' '.join(tags))
 
     df_test = pd.read_csv('../input/sample_submission_v2.csv')
-    # print (np.array(tags_test).shape, np.array(preds_test).shape, df_test.shape)
     df_test['tags'] = tags_test
     df_test.to_csv('../output/{}.csv'.format(fout_name), index=False)
     if tta:
         pd.DataFrame(preds_test).to_csv('../output/preds_{}_tta2.csv'.format(fout_name), index=False)
         pd.DataFrame(preds_test_all).to_csv('../output/preds_{}_all_tta2.csv'.format(fout_name), index=False)
-
-# def search_alpha_itr(preds_1, preds_2, y_val):
-#     best_alpha = 0
-#     best_gap = 0
-#     for alpha in np.arange(0, 1.01, 0.01):
-#         preds = alpha * preds_1 + (1 - alpha) * preds_2
-#         g = gap(preds, y_val)
-#         if g > best_gap:
-#             best_gap = g
-#             best_alpha = alpha
-#         print('val GAP {:.5}; alpha: {:.5}'.format(g, alpha))
-#     print('val best GAP {:.5}; best_alpha: {:.5}'.format(best_gap, best_alpha))
-#     return best_alpha
-
-# def search_alpha(model_1, model_2, wdir_id1, wdir_id2, n_val=20000):
-#     _, audio_val, rgb_val, y_val = next(tf_iterator('val', n_val))
-
-#     model_1.load_weights(get_wfile(wdir_id1))
-#     model_2.load_weights(get_wfile(wdir_id2))
-
-#     preds_1 = model_1.predict({'audio': audio_val, 'rgb': rgb_val}, verbose=False, batch_size=100)
-#     preds_2 = model_2.predict({'audio': audio_val, 'rgb': rgb_val}, verbose=False, batch_size=100)
-    
-#     return search_alpha_itr(preds_1, preds_2, y_val)
-
-# def search_alphas(models, wdir_ids, n_val=20000):
-#     _, audio_val, rgb_val, y_val = next(tf_iterator('val', n_val))
-
-#     wfiles = [get_wfile(i) for i in wdir_ids]
-#     alphas = np.ones(len(models))
-
-#     for i in range(len(models)):
-#         models[i].load_weights(wfiles[i])
-
-#     models_preds = [model.predict({'audio': audio_val, 'rgb': rgb_val}, verbose=0, batch_size=100)
-#                         for model in models]
-    
-#     preds_1 = models_preds[0]
-#     for i in range(1, len(models)):
-#         preds_2 = models_preds[i]
-#         alpha = search_alpha_itr(preds_1, preds_2, y_val)
-#         for j in range(i):
-#             alphas[j] *= alpha
-#         alphas[i] *= (1 - alpha)
-
-#         preds_1 = alpha * preds_1 + (1 - alpha) * preds_2
-
-#     preds = np.average(models_preds, weights=alphas, axis=0)
-#     print('val GAP {}; alphas: {}'.format(gap(preds, y_val), alphas))
-
-#     return alphas
