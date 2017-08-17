@@ -185,7 +185,7 @@ def train_model(model, model_name, opt, n_epoch=100, batch_size=128, es_patience
     
     def scheduler(epoch):
         if epoch % 10 == 0 and epoch != 0:
-            lr = K.gte_value(model.optimizer.lr)
+            lr = K.get_value(model.optimizer.lr)
             K.set_value(model.optimizer.lr, lr*.1)
             print("lr changed to {}".format(lr*.1))
         return K.get_value(model.optimizer.lr)
