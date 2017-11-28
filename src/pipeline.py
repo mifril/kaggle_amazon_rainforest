@@ -47,11 +47,6 @@ def model_2():
     base_model = ResNet50(include_top=False, weights='imagenet', input_shape=(256, 256, 3))
     pipeline(base_model, model_name ='resnet_256', fout_name='resnet_256', img_size=256, n_ft_layers=-28)
 
-def model_3():
-    from densenet121 import densenet121_model
-    base_model = densenet121_model(img_rows=256, img_cols=256, color_type=3, dropout_rate=0.2)
-    pipeline(base_model, model_name ='densenet_121', fout_name='densenet_121', img_size=256, batch_size=32, n_ft_layers=-360)
-
 def model_4():
     base_model = ResNet50(include_top=False, weights='imagenet', input_shape=(256, 256, 3))
     pipeline(base_model, model_name ='resnet_256_2', fout_name='resnet_256_2', img_size=256, batch_size=32, n_ft_layers=-90)
