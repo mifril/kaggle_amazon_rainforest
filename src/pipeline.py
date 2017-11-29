@@ -35,3 +35,25 @@ def pipeline(base_model, model_name, fout_name, img_size, batch_size=32, n_ft_la
     f2_val_score = train_model(model, model_name, Adam(1e-5), 10, batch_size=32, img_size=img_size)
     print ('Validation score: ', f2_val_score)
     gc.collect()
+<<<<<<< HEAD
+=======
+
+    predict(model, model_name, fout_name=fout_name, batch_size=batch_size, img_size=img_size, tta=False)
+    predict(model, model_name, fout_name=fout_name + '_tta', batch_size=batch_size, img_size=img_size, tta=True)
+
+def model_1():
+    base_model = ResNet50(include_top=False, weights='imagenet', input_shape=(224, 224, 3))
+    pipeline(base_model, model_name ='resnet', fout_name='resnet', img_size=224, n_ft_layers=-28)
+
+def model_2():
+    base_model = ResNet50(include_top=False, weights='imagenet', input_shape=(256, 256, 3))
+    pipeline(base_model, model_name ='resnet_256', fout_name='resnet_256', img_size=256, n_ft_layers=-28)
+
+def model_4():
+    base_model = ResNet50(include_top=False, weights='imagenet', input_shape=(256, 256, 3))
+    pipeline(base_model, model_name ='resnet_256_2', fout_name='resnet_256_2', img_size=256, batch_size=32, n_ft_layers=-90)
+
+if __name__ == '__main__':
+    model_4()
+    gc.collect()
+>>>>>>> dfa03dc3beaeb7a652f3088be405e6e6badaacda
